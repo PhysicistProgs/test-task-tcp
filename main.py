@@ -7,17 +7,18 @@ def start_server():
     server.listen(100)
     print("working")
     while True:
-        process_requests(server)
+        client_socket, address = server.accept()
+        process_requests(client_socket)
 
 
-def process_requests(server):
-    client_socket, address = server.accept()
-    request_data = client_socket.recv(1024)
-    response, is_answered = process_data(request_data)
-    log_to_file(response)
-    if is_answered:
-        client_socket.send(response)
-    client_socket.close()
+def process_requests(client_socket):
+    while True:
+        request_data = client_socket.recv(1024)
+        response, is_answered = process_data(request_data)
+        log_to_file(response)
+        if is_answered:
+            client_socket.send(response)
+        # client_socket.close()
 
 
 def log_to_file(data):
@@ -36,7 +37,7 @@ def list_to_variables(data_list: list) -> tuple:
 
 def process_data(request_data):
     data = request_data.decode('utf-8').rstrip('')
-    sportsmen_data_list = data.split('x')
+    sportsmen_data_list = data.split(' ')
     try:
         sportsmen_number, channel, time, rounded_time, group_number = list_to_variables(sportsmen_data_list)
     except (ValueError, IndexError):
@@ -49,7 +50,7 @@ def process_data(request_data):
     return response_data.encode('utf-8'), is_answered
 
 
-PORT = 5558
+PORT = 5556
 start_server()
 
 
