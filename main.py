@@ -1,4 +1,5 @@
 import socket
+from threading import Thread
 
 
 def start_server():
@@ -8,14 +9,18 @@ def start_server():
     print("working")
     while True:
         client_socket, address = server.accept()
-        process_requests(client_socket)
+        t = Thread(target=listen_user, args=(client_socket, ))
+        t.start()
 
+def listen_user(client_socket):
+    process_requests(client_socket)
 
 def process_requests(client_socket):
     while True:
         request_data = client_socket.recv(1024)
         response, is_answered = process_data(request_data)
         log_to_file(response)
+
         if is_answered:
             client_socket.send(response)
         # client_socket.close()
@@ -50,7 +55,7 @@ def process_data(request_data):
     return response_data.encode('utf-8'), is_answered
 
 
-PORT = 5556
+PORT = 5555
 start_server()
 
 
